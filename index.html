@@ -1,272 +1,256 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>School Pinyin</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Learn Pinyin</title>
+<script src="https://cdn.jsdelivr.net/npm/pinyin-pro@3.26.0/dist/index.js"></script>
 <style>
-:root{--bg:#f2f6f5;--card:#fff;--ink:#14343a;--mute:#5d7378;--line:#d3e0de;--acc:#1f7a74;
---t1:#c2362f;--t2:#b7740a;--t3:#2a6fb5;--t4:#7a47b0;--t0:#5d7378;
-box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
-@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){color-scheme:dark;--bg:#0f1a1c;--card:#172628;--ink:#e3efed;--mute:#93abae;--line:#2a3f42;--acc:#4fc3b9;
---t1:#ff7b73;--t2:#f0b04a;--t3:#6db3f2;--t4:#c39bf0;--t0:#93abae}}
-:root[data-theme="dark"]{color-scheme:dark;--bg:#0f1a1c;--card:#172628;--ink:#e3efed;--mute:#93abae;--line:#2a3f42;--acc:#4fc3b9;--t1:#ff7b73;--t2:#f0b04a;--t3:#6db3f2;--t4:#c39bf0;--t0:#93abae}
-html{scroll-padding-top:env(safe-area-inset-top,0px)}
-*{box-sizing:border-box}
-body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 "Noto Sans SC",system-ui,-apple-system,"Segoe UI",sans-serif}
-main{max-width:760px;margin:0 auto;padding:20px 16px 48px}
-h1{font:600 28px/1.2 "Noto Serif SC",Georgia,serif;margin:0 0 4px}
-h2{font:600 20px/1.3 "Noto Serif SC",Georgia,serif;margin:36px 0 6px}
-p.sub{margin:0 0 12px;color:var(--mute)}
-.bar{display:flex;flex-wrap:wrap;gap:12px;align-items:center;background:var(--card);border:1px solid var(--line);border-radius:10px;padding:10px 14px;margin-top:14px}
-.bar label{display:flex;gap:8px;align-items:center;color:var(--mute);font-size:14px}
-.key{display:flex;gap:12px;font-size:14px;margin-left:auto}
-.key b{font-weight:600}
-.t1{color:var(--t1)}.t2{color:var(--t2)}.t3{color:var(--t3)}.t4{color:var(--t4)}.t0{color:var(--t0)}
-button{font:inherit;color:inherit;cursor:pointer}
-button:focus-visible,textarea:focus-visible,select:focus-visible{outline:3px solid var(--acc);outline-offset:2px}
-.letters{display:grid;grid-template-columns:repeat(auto-fill,minmax(76px,1fr));gap:8px}
-.letter{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:8px 4px;text-align:center}
-.letter:hover,.word:hover{border-color:var(--acc)}
-.letter .big{display:block;font:600 28px/1.1 "Noto Serif SC",Georgia,serif}
-.letter .sd{display:block;font-size:13px;color:var(--mute)}
-.letter.on,.word.on{background:color-mix(in srgb,var(--acc) 18%,var(--card));border-color:var(--acc)}
-.sent{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px;margin:12px 0}
-.row{display:flex;flex-wrap:wrap;gap:6px 4px;align-items:flex-end}
-.word{background:none;border:1px solid transparent;border-radius:8px;padding:2px 8px;text-align:center}
-.word .py{display:block;font-size:17px;font-weight:500}
-.word .hz{display:block;font-size:30px;line-height:1.2;color:var(--ink)}
-.punc{font-size:30px;line-height:1.2;align-self:flex-end;color:var(--ink)}
-.meaning{margin-top:8px;color:var(--mute);font-size:15px}
-.meaning.hide{visibility:hidden}
-.acts{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap}
-.btn{border:1px solid var(--line);background:var(--bg);border-radius:8px;padding:6px 12px;font-size:14px}
-.btn:hover{border-color:var(--acc)}
-.btn.main{background:var(--acc);color:#fff;border-color:var(--acc)}
-:root[data-theme="dark"] .btn.main{color:#0f1a1c}
-@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .btn.main{color:#0f1a1c}}
-textarea{width:100%;min-height:76px;font:inherit;font-size:20px;padding:10px;border-radius:10px;border:1px solid var(--line);background:var(--card);color:var(--ink);resize:vertical}
-#msg{font-size:14px;color:var(--mute);margin:6px 0}
-.cat{font:600 16px/1.3 "Noto Serif SC",Georgia,serif;margin:20px 0 6px}
-.word .en{display:block;font-size:12px;color:var(--mute)}
-#bank .word{background:var(--card);border-color:var(--line)}
-#build{min-height:64px}
-.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:2px 14px}
-.pair{display:grid;grid-template-columns:minmax(0,5fr) minmax(0,7fr);gap:6px 16px;align-items:center;padding:12px 0;border-top:1px solid var(--line)}
-.pair:first-child{border-top:0}
-.eng{font-size:17px}
-.zh{display:flex;flex-wrap:wrap;gap:4px;align-items:flex-end}
-.zh .play{align-self:center;margin-left:auto}
-.slot{background:color-mix(in srgb,var(--acc) 16%,transparent);border-bottom:2px solid var(--acc);border-radius:4px;padding:0 6px;font-weight:600;cursor:pointer}
-.word.slotw{background:color-mix(in srgb,var(--acc) 12%,transparent);border-bottom:2px solid var(--acc);border-radius:8px 8px 0 0}
-.hide .eng:not(.show){filter:blur(7px);cursor:pointer}
-.fld{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin:8px 0}
-.fld>label{min-width:112px;color:var(--mute);font-size:14px}
-.fld input,.fld select{font:inherit;padding:6px 8px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--ink);max-width:100%}
-.fld input.hzi{width:110px;font-size:18px}
-@media (max-width:560px){.pair{grid-template-columns:1fr}}
+  body{font-family:system-ui,Arial,sans-serif;max-width:760px;margin:0 auto;padding:14px;background:#faf8f3;color:#222}
+  h1{font-size:24px;margin:6px 0}
+  h2{font-size:18px;margin:26px 0 8px;border-bottom:2px solid #d9d2c3;padding-bottom:4px}
+  h3{font-size:15px;margin:16px 0 6px;color:#8a1c1c}
+  .note{font-size:13px;color:#666}
+  .letters{display:grid;grid-template-columns:repeat(auto-fill,minmax(64px,1fr));gap:8px}
+  .letters button{padding:10px 0;font-size:20px;font-weight:bold;border:1px solid #c9c0ac;border-radius:8px;background:#fff;cursor:pointer}
+  .letters button small{display:block;font-size:11px;font-weight:normal;color:#777}
+  .letters button:active,.chip:active{background:#ffe9a8}
+  .me{display:flex;gap:10px;flex-wrap:wrap;background:#fff;border:1px solid #d9d2c3;border-radius:8px;padding:10px}
+  .me label{font-size:14px}
+  .me input{font-size:16px;padding:6px;width:130px;border:1px solid #bbb;border-radius:6px}
+  .row{display:flex;gap:10px;background:#fff;border:1px solid #e2dccd;border-radius:8px;margin:6px 0;padding:10px;align-items:center}
+  .en{flex:1;font-size:15px}
+  .zh{flex:1;cursor:pointer;text-align:right}
+  .zh .py{font-size:17px;color:#8a1c1c}
+  .zh .hz{font-size:24px}
+  .zh:hover{background:#fff4d1}
+  .chips{display:flex;flex-wrap:wrap;gap:6px}
+  .chip{border:1px solid #c9c0ac;background:#fff;border-radius:16px;padding:6px 12px;cursor:pointer;text-align:center;font-size:13px}
+  .chip b{display:block;font-size:18px;font-weight:normal}
+  .chip i{display:block;color:#8a1c1c;font-style:normal}
+  textarea{width:100%;box-sizing:border-box;font-size:20px;padding:8px;border:1px solid #bbb;border-radius:8px;min-height:70px}
+  .act button{font-size:15px;padding:8px 14px;margin:6px 6px 0 0;border:0;border-radius:8px;background:#8a1c1c;color:#fff;cursor:pointer}
+  #out{font-size:20px;color:#8a1c1c;margin-top:10px;min-height:28px}
+  #status{font-size:12px;color:#a33}
 </style>
 </head>
 <body>
-<main>
-<h1>School Pinyin</h1>
-<p class="sub">Practice school conversation. Tap any word or sentence to hear it. Pinyin colors show the tone.</p>
-<div class="bar">
-  <label>Speed <input id="rate" type="range" min="0.5" max="1.1" step="0.1" value="0.8" aria-label="Speech speed"></label>
-  <label><input type="checkbox" id="hideEn"> Hide English</label>
-  <span class="key" aria-label="Tone colors"><b class="t1">ā 1</b><b class="t2">á 2</b><b class="t3">ǎ 3</b><b class="t4">à 4</b><b class="t0">a</b></span>
+<h1>Learn Hanyu Pinyin 拼音</h1>
+<p class="note">Tap any letter, word or sentence to hear it. <span id="status"></span></p>
+
+<h2>1. Pinyin sounds</h2>
+<p class="note">Tap a sound to hear it. The small text is an example word.</p>
+<h3>Initials 声母</h3>
+<div class="letters" id="initials"></div>
+<h3>Finals 韵母</h3>
+<div class="letters" id="finals"></div>
+<h3>4 tones 声调</h3>
+<div class="letters" id="tones"></div>
+
+<h2>2. About me (change the blanks)</h2>
+<div class="me">
+  <label>My name (Chinese characters)<br><input id="nameIn" value="小明"></label>
+  <label>My age (number)<br><input id="ageIn" type="number" min="1" max="99" value="8"></label>
 </div>
-<div id="msg" role="status"></div>
 
+<h2>3. School sentences</h2>
+<p class="note">English on the left. Pinyin and Mandarin on the right. Tap the right side to listen.</p>
+<div id="sentences"></div>
 
-<h2>My details</h2>
-<p class="sub">Change these once and every highlighted blank below updates. For names, type the Chinese characters and the pinyin.</p>
-<div class="sent" id="me"></div>
+<h2>4. Word lists</h2>
+<p class="note">Tap a word to hear it and add it to the box below.</p>
+<div id="words"></div>
 
-<h2>School conversations</h2>
-<p class="sub">English on the left, Mandarin on the right. Tap a highlighted English blank to edit it. Tap a Mandarin word to hear it, or ▶ for the whole sentence. Tick Hide English to practice, then tap a line to peek.</p>
-<div id="daily"></div>
-
-<h2>Vocabulary and sentence builder</h2>
-<p class="sub">Tap words from the lists to build a sentence here, then play it. Word order is who + does what + to what, like 我 + 喜欢 + 数学.</p>
-<div class="sent"><div class="row" id="build" aria-live="polite"></div><div class="acts"><button class="btn main" id="bplay" type="button">Play</button><button class="btn" id="bundo" type="button">Undo</button><button class="btn" id="bclear" type="button">Clear</button></div></div>
-<div id="bank"></div>
-</main>
+<h2>5. Write your own sentence</h2>
+<textarea id="custom" placeholder="Tap words above, or type Chinese characters here"></textarea>
+<div class="act">
+  <button onclick="convert()">Show pinyin</button>
+  <button onclick="speak(document.getElementById('custom').value)">Listen</button>
+  <button onclick="document.getElementById('custom').value='';document.getElementById('out').textContent=''">Clear</button>
+</div>
+<div id="out"></div>
 
 <script>
-var msg=document.getElementById("msg"),rate=document.getElementById("rate"),voice=null,cur=null;
-function pickVoice(){var v=(window.speechSynthesis&&speechSynthesis.getVoices())||[];voice=v.find(function(x){return /^zh[-_]CN/i.test(x.lang)})||v.find(function(x){return /^zh/i.test(x.lang)})||null}
-if(window.speechSynthesis){pickVoice();speechSynthesis.onvoiceschanged=pickVoice}
-function say(t,el){
-  if(!window.speechSynthesis){msg.textContent="This browser can’t play speech. Try Chrome, Safari or Edge.";return}
+/* ---------- SOUND ---------- */
+let zhVoice=null;
+function loadVoices(){
+  const v=speechSynthesis.getVoices();
+  zhVoice=v.find(x=>x.lang==='zh-CN')||v.find(x=>x.lang.toLowerCase().startsWith('zh'))||null;
+  document.getElementById('status').textContent=
+    zhVoice?'':'(No Chinese voice found on this device. Install one in your system speech settings.)';
+}
+if('speechSynthesis' in window){loadVoices();speechSynthesis.onvoiceschanged=loadVoices;}
+function speak(text){
+  if(!('speechSynthesis' in window)){alert('Speech is not supported in this browser.');return;}
+  if(!text)return;
   speechSynthesis.cancel();
-  var u=new SpeechSynthesisUtterance(t);u.lang="zh-CN";u.rate=parseFloat(rate.value);if(voice)u.voice=voice;
-  msg.textContent=voice?"":"No Chinese voice found on this device, so the sound may be wrong. Add a Mandarin voice in your system speech settings.";
-  if(cur)cur.classList.remove("on");
-  if(el){cur=el;el.classList.add("on");u.onend=u.onerror=function(){el.classList.remove("on")}}
+  const u=new SpeechSynthesisUtterance(text);
+  u.lang='zh-CN';u.rate=0.8;
+  if(zhVoice)u.voice=zhVoice;
   speechSynthesis.speak(u);
 }
-function tone(p){
-  if(/[āēīōūǖ]/.test(p))return 1;if(/[áéíóúǘ]/.test(p))return 2;
-  if(/[ǎěǐǒǔǚ]/.test(p))return 3;if(/[àèìòùǜ]/.test(p))return 4;return 0}
-function mk(tag,cls,txt){var e=document.createElement(tag);if(cls)e.className=cls;if(txt!=null)e.textContent=txt;return e}
-function wordBtn(hz,py,cls){
-  var b=mk("button","word"+(cls?" "+cls:""));b.type="button";
-  var p=mk("span","py");py.split(" ").forEach(function(x,i){if(i)p.appendChild(document.createTextNode(" "));p.appendChild(mk("span","t"+tone(x),x))});
-  b.appendChild(p);b.appendChild(mk("span","hz",hz));
-  b.setAttribute("aria-label",py+", "+hz);
-  b.onclick=function(){say(hz,b)};return b}
-function render(words,box){
-  var row=mk("div","row");
-  words.forEach(function(w){row.appendChild(w[1]?wordBtn(w[0],w[1]):mk("span","punc",w[0]))});
-  box.appendChild(row)}
-function actions(box,text,meaning){
-  var a=mk("div","acts"),p=mk("button","btn main","Play sentence");p.type="button";p.onclick=function(){say(text,p)};a.appendChild(p);
-  if(meaning){var m=mk("div","meaning hide",meaning),s=mk("button","btn","Show meaning");s.type="button";
-    s.onclick=function(){var h=m.classList.toggle("hide");s.textContent=h?"Show meaning":"Hide meaning"};
-    a.appendChild(s);box.appendChild(a);box.appendChild(m)}else box.appendChild(a)}
-var B=[["Nouns","学校|xué xiào|school;教室|jiào shì|classroom;老师|lǎo shī|teacher;学生|xué sheng|student;同学|tóng xué|classmate;朋友|péng you|friend;校长|xiào zhǎng|principal;班|bān|class (group);书|shū|book;课本|kè běn|textbook;笔|bǐ|pen;铅笔|qiān bǐ|pencil;本子|běn zi|notebook;书包|shū bāo|schoolbag;黑板|hēi bǎn|blackboard;桌子|zhuō zi|desk;椅子|yǐ zi|chair;电脑|diàn nǎo|computer;作业|zuò yè|homework;考试|kǎo shì|exam;课|kè|class, lesson;数学|shù xué|math;英语|yīng yǔ|English;中文|zhōng wén|Chinese;科学|kē xué|science;音乐|yīn yuè|music;体育|tǐ yù|PE;图书馆|tú shū guǎn|library;食堂|shí táng|cafeteria;操场|cāo chǎng|playground;洗手间|xǐ shǒu jiān|restroom;问题|wèn tí|question;答案|dá àn|answer;字|zì|character;词|cí|word;名字|míng zi|name;今天|jīn tiān|today;明天|míng tiān|tomorrow;星期|xīng qī|week;时间|shí jiān|time"],
-["Verbs","是|shì|to be;有|yǒu|to have;去|qù|go;来|lái|come;进|jìn|enter;上课|shàng kè|attend class;下课|xià kè|finish class;迟到|chí dào|be late;学习|xué xí|study;学|xué|learn;教|jiāo|teach;读|dú|read;写|xiě|write;听|tīng|listen;说|shuō|speak;看|kàn|look, watch;问|wèn|ask;回答|huí dá|answer;懂|dǒng|understand;明白|míng bai|understand;知道|zhī dào|know;忘|wàng|forget;帮助|bāng zhù|help;喜欢|xǐ huan|like;想|xiǎng|want, think;要|yào|want, need;打开|dǎ kāi|open;带|dài|bring;跟|gēn|follow;坐|zuò|sit;站起来|zhàn qǐ lai|stand up;举手|jǔ shǒu|raise hand;吃|chī|eat;喝|hē|drink;玩|wán|play"],
-["Adjectives","好|hǎo|good;大|dà|big;小|xiǎo|small;多|duō|many;少|shǎo|few;新|xīn|new;难|nán|difficult;容易|róng yì|easy;简单|jiǎn dān|simple;有意思|yǒu yì si|interesting;聪明|cōng ming|smart;认真|rèn zhēn|serious, diligent;累|lèi|tired;忙|máng|busy;高兴|gāo xìng|happy;安静|ān jìng|quiet;大声|dà shēng|loud;快|kuài|fast;慢|màn|slow;对|duì|correct;错|cuò|wrong;早|zǎo|early;晚|wǎn|late"],
-["Question and small words","我|wǒ|I;你|nǐ|you;他|tā|he;她|tā|she;我们|wǒ men|we;你们|nǐ men|you (plural);他们|tā men|they;这|zhè|this;那|nà|that;的|de|’s;不|bù|not;很|hěn|very;也|yě|also;都|dōu|all;吗|ma|question;呢|ne|and you?;了|le|done;在|zài|at, -ing;和|hé|and;可以|kě yǐ|may, can;什么|shén me|what;谁|shéi|who;哪里|nǎ lǐ|where;什么时候|shén me shí hou|when;怎么|zěn me|how;几|jǐ|how many;多少|duō shao|how many, how much;为什么|wèi shén me|why;。||period;？||question mark;！||exclamation mark;，||comma"]];
-var arr=[],bd=document.getElementById("build");
-function draw(){bd.textContent="";if(!arr.length)bd.appendChild(mk("span","meaning","Your sentence appears here"));
-  arr.forEach(function(w){bd.appendChild(w[1]?wordBtn(w[0],w[1]):mk("span","punc",w[0]))})}
-draw();
-var bk=document.getElementById("bank");
-B.forEach(function(c){bk.appendChild(mk("h3","cat",c[0]));var r=mk("div","row");
-  c[1].split(";").forEach(function(x){var p=x.split("|"),b=mk("button","word");b.type="button";
-    if(p[1])b.appendChild(mk("span","py t"+tone(p[1]),p[1]));
-    b.appendChild(mk("span","hz",p[0]));if(p[2])b.appendChild(mk("span","en",p[2]));
-    b.setAttribute("aria-label","Add "+p[0]+", "+(p[2]||""));
-    b.onclick=function(){arr.push([p[0],p[1]]);draw();if(p[1])say(p[0],b)};r.appendChild(b)});
-  bk.appendChild(r)});
-document.getElementById("bplay").onclick=function(){if(arr.length)say(arr.map(function(w){return w[0]}).join(""))};
-document.getElementById("bundo").onclick=function(){arr.pop();draw()};
-document.getElementById("bclear").onclick=function(){arr=[];draw()};
-var G=[
-["Introduce yourself (change the blanks)",[
-"My name is {name}.#我|wǒ/叫|jiào/{name}/。",
-"I am {age} years old.#我|wǒ/{age}/。",
-"I am a student in grade {grade}.#我|wǒ/是|shì/{grade}/的|de/学生|xué sheng/。",
-"My favorite subject is {subject}.#我|wǒ/最|zuì/喜欢|xǐ huan/{subject}/。",
-"My teacher is {teacher}.#我|wǒ/的|de/老师|lǎo shī/是|shì/{teacher}/。",
-"Hello, {teacher}!#{teacher}/好|hǎo/！",
-"Thank you, {teacher}.#谢谢|xiè xie/{teacher}/。",
-"Are you {name}?#你|nǐ/是|shì/{name}/吗|ma/？",
-"I like {subject}.#我|wǒ/喜欢|xǐ huan/{subject}/。",
-"I don’t like {subject}.#我|wǒ/不|bù/喜欢|xǐ huan/{subject}/。",
-"We have {subject} class today.#今天|jīn tiān/有|yǒu/{subject}/课|kè/。",
-"Class starts at {time} o’clock.#我们|wǒ men/{time}/上课|shàng kè/。"]],
-["Greetings",[
-"Hello, classmates!#同学们|tóng xué men/好|hǎo/！",
-"Good morning!#早上|zǎo shang/好|hǎo/！",
-"Hello!#你|nǐ/好|hǎo/！",
-"Please come in.#请|qǐng/进|jìn/。",
-"Please sit.#请|qǐng/坐|zuò/。",
-"Sorry, I’m late.#对不起|duì bu qǐ/，/我|wǒ/迟到|chí dào/了|le/。",
-"It’s okay.#没关系|méi guān xi/。",
-"Class is over.#下课|xià kè/了|le/。",
-"Goodbye, see you tomorrow!#再见|zài jiàn/，/明天|míng tiān/见|jiàn/！"]],
-["Asking: who and what",[
-"Who is she?#她|tā/是|shì/谁|shéi/？",
-"Who is he?#他|tā/是|shì/谁|shéi/？",
-"Is she a teacher?#她|tā/是|shì/老师|lǎo shī/吗|ma/？",
-"Are you a student?#你|nǐ/是|shì/学生|xué sheng/吗|ma/？",
-"What’s your name?#你|nǐ/叫|jiào/什么|shén me/名字|míng zi/？",
-"How old are you?#你|nǐ/多大|duō dà/？",
-"What grade are you in?#你|nǐ/几年级|jǐ nián jí/？",
-"What is this?#这|zhè/是|shì/什么|shén me/？",
-"What is that?#那|nà/是|shì/什么|shén me/？",
-"What does this word mean?#这个|zhè ge/词|cí/是|shì/什么|shén me/意思|yì si/？",
-"Who is your teacher?#你|nǐ/的|de/老师|lǎo shī/是|shì/谁|shéi/？",
-"What class do you like?#你|nǐ/喜欢|xǐ huan/什么|shén me/课|kè/？"]],
-["Asking: where, when, how many",[
-"Where is the classroom?#教室|jiào shì/在|zài/哪里|nǎ lǐ/？",
-"Where is the library?#图书馆|tú shū guǎn/在|zài/哪里|nǎ lǐ/？",
-"Where is the restroom?#洗手间|xǐ shǒu jiān/在|zài/哪里|nǎ lǐ/？",
-"What time is it?#现在|xiàn zài/几点|jǐ diǎn/？",
-"What day is today?#今天|jīn tiān/星期|xīng qī/几|jǐ/？",
-"What time does class start?#几点|jǐ diǎn/上课|shàng kè/？",
-"When is the exam?#考试|kǎo shì/是|shì/什么|shén me/时候|shí hou/？",
-"How many students are in your class?#你们|nǐ men/班|bān/有|yǒu/几个|jǐ ge/学生|xué sheng/？",
-"Is there a lot of homework?#作业|zuò yè/多|duō/吗|ma/？",
-"How do you get to school?#你|nǐ/怎么|zěn me/去|qù/学校|xué xiào/？"]],
-["Asking: how, why, can I",[
-"How do you read this character?#这个|zhè ge/字|zì/怎么|zěn me/读|dú/？",
-"How do you write this character?#这个|zhè ge/字|zì/怎么|zěn me/写|xiě/？",
-"Why do you study Chinese?#你|nǐ/为什么|wèi shén me/学|xué/中文|zhōng wén/？",
-"Do you understand?#你|nǐ/明白|míng bai/吗|ma/？",
-"Did you understand?#你|nǐ/听|tīng/懂|dǒng/了|le/吗|ma/？",
-"Can you say it again?#可以|kě yǐ/再|zài/说|shuō/一遍|yí biàn/吗|ma/？",
-"May I go to the restroom?#我|wǒ/可以|kě yǐ/去|qù/洗手间|xǐ shǒu jiān/吗|ma/？",
-"May I ask a question?#我|wǒ/可以|kě yǐ/问|wèn/一个|yí ge/问题|wèn tí/吗|ma/？",
-"Do you have a pen?#你|nǐ/有|yǒu/笔|bǐ/吗|ma/？",
-"Can you help me?#你|nǐ/可以|kě yǐ/帮助|bāng zhù/我|wǒ/吗|ma/？"]],
-["Teacher says",[
-"Please open your book.#请|qǐng/打开|dǎ kāi/书|shū/。",
-"Please look at the blackboard.#请|qǐng/看|kàn/黑板|hēi bǎn/。",
-"Please read after me.#请|qǐng/跟|gēn/我|wǒ/读|dú/。",
-"Please be quiet.#请|qǐng/安静|ān jìng/。",
-"Please raise your hand.#请|qǐng/举手|jǔ shǒu/。",
-"Please write your name.#请|qǐng/写|xiě/你|nǐ/的|de/名字|míng zi/。",
-"Please answer the question.#请|qǐng/回答|huí dá/问题|wèn tí/。",
-"Please stand up.#请|qǐng/站起来|zhàn qǐ lai/。",
-"Please read aloud.#请|qǐng/大声|dà shēng/读|dú/。",
-"There is an exam today.#今天|jīn tiān/有|yǒu/考试|kǎo shì/。"]],
-["I say",[
-"I am a student.#我|wǒ/是|shì/学生|xué sheng/。",
-"She is my teacher.#她|tā/是|shì/我|wǒ/的|de/老师|lǎo shī/。",
-"He is my classmate.#他|tā/是|shì/我|wǒ/的|de/同学|tóng xué/。",
-"This is my book.#这|zhè/是|shì/我|wǒ/的|de/书|shū/。",
-"That is the classroom.#那|nà/是|shì/教室|jiào shì/。",
-"I don’t like exams.#我|wǒ/不|bù/喜欢|xǐ huan/考试|kǎo shì/。",
-"I have a lot of homework.#我|wǒ/有|yǒu/很|hěn/多|duō/作业|zuò yè/。",
-"Chinese is interesting.#中文|zhōng wén/很|hěn/有意思|yǒu yì si/。",
-"I don’t understand.#我|wǒ/不|bù/明白|míng bai/。",
-"I understand.#我|wǒ/听|tīng/懂|dǒng/了|le/。",
-"I forgot my book.#我|wǒ/忘|wàng/了|le/带|dài/书|shū/。"]]
+
+/* ---------- PINYIN SOUNDS: [sound, example hanzi spoken, example pinyin] ---------- */
+const initials=[['b','波','bō'],['p','坡','pō'],['m','摸','mō'],['f','佛','fó'],['d','的','de'],['t','特','tè'],['n','讷','nè'],['l','勒','lè'],
+['g','哥','gē'],['k','科','kē'],['h','喝','hē'],['j','鸡','jī'],['q','七','qī'],['x','西','xī'],
+['zh','知','zhī'],['ch','吃','chī'],['sh','诗','shī'],['r','日','rì'],['z','资','zī'],['c','雌','cī'],['s','思','sī'],['y','衣','yī'],['w','乌','wū']];
+const finals=[['a','啊','ā'],['o','喔','ō'],['e','鹅','é'],['i','衣','yī'],['u','乌','wū'],['ü','迂','yū'],
+['ai','哀','āi'],['ei','欸','ēi'],['ui','威','wēi'],['ao','熬','āo'],['ou','欧','ōu'],['iu','优','yōu'],['ie','耶','yē'],['üe','约','yuē'],['er','儿','ér'],
+['an','安','ān'],['en','恩','ēn'],['in','因','yīn'],['un','温','wēn'],['ün','晕','yūn'],
+['ang','昂','áng'],['eng','灯','dēng'],['ing','英','yīng'],['ong','东','dōng']];
+const tones=[['1st ˉ','妈','mā'],['2nd ˊ','麻','má'],['3rd ˇ','马','mǎ'],['4th ˋ','骂','mà'],['neutral','吗','ma']];
+function buildSounds(id,list){
+  const box=document.getElementById(id);
+  list.forEach(x=>{
+    const b=document.createElement('button');
+    b.innerHTML=x[0]+'<small>'+x[2]+' '+x[1]+'</small>';
+    b.onclick=()=>speak(x[1]);
+    box.appendChild(b);
+  });
+}
+buildSounds('initials',initials);buildSounds('finals',finals);buildSounds('tones',tones);
+
+/* ---------- NUMBERS & NAME ---------- */
+const dz=['零','一','二','三','四','五','六','七','八','九'];
+const dp=['líng','yī','èr','sān','sì','wǔ','liù','qī','bā','jiǔ'];
+function numZh(n){
+  if(n<10)return dz[n];
+  if(n<20)return '十'+(n%10?dz[n%10]:'');
+  return dz[Math.floor(n/10)]+'十'+(n%10?dz[n%10]:'');
+}
+function numPy(n){
+  if(n<10)return dp[n];
+  if(n<20)return 'shí'+(n%10?' '+dp[n%10]:'');
+  return dp[Math.floor(n/10)]+' shí'+(n%10?' '+dp[n%10]:'');
+}
+function pinyinOf(t){
+  if(window.pinyinPro&&/[\u4e00-\u9fff]/.test(t))
+    return pinyinPro.pinyin(t,{toneType:'symbol'});
+  return t;
+}
+function me(){
+  const name=document.getElementById('nameIn').value.trim()||'小明';
+  let age=parseInt(document.getElementById('ageIn').value,10);
+  if(!(age>=1&&age<=99))age=8;
+  return {nameZh:name,namePy:pinyinOf(name),ageZh:numZh(age),agePy:numPy(age)};
+}
+
+/* ---------- SENTENCES: [English, Chinese, Pinyin] ---------- */
+const groups=[
+ ['Greetings',[
+  ['Hello!','你好！','nǐ hǎo!'],
+  ['Hello, teacher!','老师好！','lǎoshī hǎo!'],
+  ['Good morning!','早上好！','zǎoshang hǎo!'],
+  ['Good afternoon!','下午好！','xiàwǔ hǎo!'],
+  ['Good evening!','晚上好！','wǎnshang hǎo!'],
+  ['Good night!','晚安！','wǎn’ān!'],
+  ['Goodbye!','再见！','zàijiàn!'],
+  ['See you tomorrow!','明天见！','míngtiān jiàn!'],
+  ['Welcome!','欢迎！','huānyíng!'],
+  ['Thank you.','谢谢。','xièxie.'],
+  ['You are welcome.','不客气。','bú kèqi.'],
+  ['Sorry.','对不起。','duìbuqǐ.'],
+  ['No problem.','没关系。','méi guānxi.'],
+  ['Excuse me. / May I ask...','请问……','qǐngwèn...'],
+  ['Please sit down.','请坐。','qǐng zuò.'],
+  ['Happy birthday!','生日快乐！','shēngrì kuàilè!'],
+  ['Nice to meet you.','很高兴认识你。','hěn gāoxìng rènshi nǐ.'],
+  ['I am fine, thank you.','我很好，谢谢。','wǒ hěn hǎo, xièxie.'],
+  ['And you?','你呢？','nǐ ne?'],
+  ['My name is ___.','我叫{name}。','wǒ jiào {name}.'],
+  ['I am ___ years old.','我{age}岁。','wǒ {age} suì.']
+ ]],
+ ['Asking questions',[
+  ['Who is he / she?','他是谁？','tā shì shéi?'],
+  ['Who is your teacher?','谁是你的老师？','shéi shì nǐ de lǎoshī?'],
+  ['How are you?','你好吗？','nǐ hǎo ma?'],
+  ['What is your name?','你叫什么名字？','nǐ jiào shénme míngzi?'],
+  ['What is his name?','他叫什么名字？','tā jiào shénme míngzi?'],
+  ['How old are you?','你几岁？','nǐ jǐ suì?'],
+  ['What is this?','这是什么？','zhè shì shénme?'],
+  ['What is that?','那是什么？','nà shì shénme?'],
+  ['Where are you?','你在哪儿？','nǐ zài nǎr?'],
+  ['Where is the classroom?','教室在哪儿？','jiàoshì zài nǎr?'],
+  ['Where is the toilet?','厕所在哪儿？','cèsuǒ zài nǎr?'],
+  ['Where do you live?','你住在哪儿？','nǐ zhù zài nǎr?'],
+  ['Are you a student?','你是学生吗？','nǐ shì xuésheng ma?'],
+  ['Is he your teacher?','他是你的老师吗？','tā shì nǐ de lǎoshī ma?'],
+  ['Do you like school?','你喜欢学校吗？','nǐ xǐhuan xuéxiào ma?'],
+  ['What do you like?','你喜欢什么？','nǐ xǐhuan shénme?'],
+  ['What time is it?','现在几点？','xiànzài jǐ diǎn?'],
+  ['What day is today?','今天星期几？','jīntiān xīngqī jǐ?'],
+  ['Why?','为什么？','wèishénme?'],
+  ['Which one?','哪个？','nǎge?'],
+  ['How much is it?','多少钱？','duōshao qián?'],
+  ['How do you say this in Chinese?','这个用中文怎么说？','zhège yòng zhōngwén zěnme shuō?'],
+  ['Do you understand?','你听懂了吗？','nǐ tīngdǒng le ma?'],
+  ['Can you help me?','你可以帮我吗？','nǐ kěyǐ bāng wǒ ma?'],
+  ['May I go to the toilet?','我可以去厕所吗？','wǒ kěyǐ qù cèsuǒ ma?'],
+  ['Please say it again.','请再说一遍。','qǐng zài shuō yí biàn.']
+ ]],
+ ['At school',[
+  ['I am a student.','我是学生。','wǒ shì xuésheng.'],
+  ['This is my teacher.','这是我的老师。','zhè shì wǒ de lǎoshī.'],
+  ['He is my classmate.','他是我的同学。','tā shì wǒ de tóngxué.'],
+  ['I like school.','我喜欢学校。','wǒ xǐhuan xuéxiào.'],
+  ['I read a book.','我读书。','wǒ dú shū.']
+ ]]
 ];
-var ME={name:{en:"Xiao Ming",hz:"小明",py:"xiǎo míng"},teacher:{en:"Ms. Wang",hz:"王老师",py:"wáng lǎo shī"},age:10,grade:5,sub:0,time:8};
-var SUB=[["math","数学","shù xué"],["English","英语","yīng yǔ"],["Chinese","中文","zhōng wén"],["science","科学","kē xué"],["music","音乐","yīn yuè"],["PE","体育","tǐ yù"],["art","美术","měi shù"],["history","历史","lì shǐ"]];
-var U=[["",""],["一","yī"],["二","èr"],["三","sān"],["四","sì"],["五","wǔ"],["六","liù"],["七","qī"],["八","bā"],["九","jiǔ"],["十","shí"]];
-function num(n){if(n<=10)return U[n];if(n<20)return["十"+U[n-10][0],"shí "+U[n-10][1]];return["二十","èr shí"]}
-function slot(k){var n;
-  if(k=="name"||k=="teacher"){var o=ME[k];return[o.en||"____",[o.hz||"＿＿",o.py||"…"]]}
-  if(k=="age"){n=num(ME.age);return[String(ME.age),[n[0]+"岁",n[1]+" suì"]]}
-  if(k=="grade"){n=num(ME.grade);return[String(ME.grade),[n[0]+"年级",n[1]+" nián jí"]]}
-  if(k=="time"){n=num(ME.time);return[String(ME.time),[n[0]+"点",n[1]+" diǎn"]]}
-  var x=SUB[ME.sub];return[x[0],[x[1],x[2]]]}
-var db=document.getElementById("daily"),meBox=document.getElementById("me");
-function goField(k){var f=document.getElementById("f-"+k);f.scrollIntoView({block:"center"});var i=f.querySelector("input,select");if(i)i.focus()}
-function pair(s){
-  var q=s.split("#"),row=mk("div","pair"),en=mk("div","eng"),zh=mk("div","zh"),hz=[];
-  q[0].split(/(\{\w+\})/).forEach(function(t){var m=t.match(/^\{(\w+)\}$/);
-    if(m){var c=mk("span","slot",slot(m[1])[0]);c.onclick=function(e){e.stopPropagation();goField(m[1])};en.appendChild(c)}
-    else if(t)en.appendChild(document.createTextNode(t))});
-  en.onclick=function(){en.classList.toggle("show")};
-  q[1].split("/").forEach(function(t){var m=t.match(/^\{(\w+)\}$/);
-    if(m){var v=slot(m[1])[1];hz.push(v[0]);zh.appendChild(wordBtn(v[0],v[1],"slotw"))}
-    else{var x=t.split("|");hz.push(x[0]);zh.appendChild(x[1]?wordBtn(x[0],x[1]):mk("span","punc",x[0]))}});
-  var pb=mk("button","btn play","▶");pb.type="button";pb.setAttribute("aria-label","Play sentence");
-  pb.onclick=function(){say(hz.join(""),pb)};zh.appendChild(pb);
-  row.appendChild(en);row.appendChild(zh);return row}
-function drawS(){db.textContent="";
-  G.forEach(function(g){db.appendChild(mk("h3","cat",g[0]));var card=mk("div","card");
-    g[1].forEach(function(s){card.appendChild(pair(s))});db.appendChild(card)})}
-function fld(id,label,els){var d=mk("div","fld");d.id="f-"+id;d.appendChild(mk("label",null,label));els.forEach(function(e){d.appendChild(e)});meBox.appendChild(d)}
-function inp(ph,o,k,cls){var i=mk("input",cls||"");i.type="text";i.placeholder=ph;i.value=o[k];i.setAttribute("aria-label",ph);i.oninput=function(){o[k]=i.value;drawS()};return i}
-function sel(o,k,opts){var s=mk("select");opts.forEach(function(t,i){var op=mk("option",null,t[0]);op.value=t[1];s.appendChild(op)});
-  s.value=o[k];s.onchange=function(){o[k]=parseInt(s.value,10);drawS()};return s}
-function range(a,b){var r=[];for(var i=a;i<=b;i++)r.push([String(i),i]);return r}
-fld("name","My name",[inp("English name",ME.name,"en"),inp("汉字",ME.name,"hz","hzi"),inp("pinyin",ME.name,"py")]);
-fld("age","My age",[sel(ME,"age",range(5,20))]);
-fld("grade","My grade",[sel(ME,"grade",range(1,12))]);
-fld("subject","Favorite subject",[sel(ME,"sub",SUB.map(function(x,i){return[x[0],i]}))]);
-fld("teacher","My teacher",[inp("English name",ME.teacher,"en"),inp("汉字",ME.teacher,"hz","hzi"),inp("pinyin",ME.teacher,"py")]);
-fld("time","Class starts at",[sel(ME,"time",range(6,11))]);
-document.getElementById("hideEn").onchange=function(){document.body.classList.toggle("hide",this.checked)};
-drawS();
+function renderSentences(){
+  const m=me(),box=document.getElementById('sentences');
+  box.innerHTML='';
+  groups.forEach(g=>{
+    const h=document.createElement('h3');h.textContent=g[0];box.appendChild(h);
+    g[1].forEach(s=>{
+      const zh=s[1].replace('{name}',m.nameZh).replace('{age}',m.ageZh);
+      let py=s[2].replace('{name}',m.namePy).replace('{age}',m.agePy);
+      let en=s[0];
+      if(s[0].includes('My name'))en='My name is '+m.nameZh+'.';
+      if(s[0].includes('years old'))en='I am '+document.getElementById('ageIn').value+' years old.';
+      const r=document.createElement('div');r.className='row';
+      r.innerHTML='<div class="en"></div><div class="zh"><div class="py"></div><div class="hz"></div></div>';
+      r.querySelector('.en').textContent=en;
+      r.querySelector('.py').textContent=py;
+      r.querySelector('.hz').textContent=zh;
+      r.querySelector('.zh').onclick=()=>speak(zh);
+      box.appendChild(r);
+    });
+  });
+}
+document.getElementById('nameIn').oninput=renderSentences;
+document.getElementById('ageIn').oninput=renderSentences;
+
+/* ---------- WORD LISTS: [hanzi, pinyin, English] ---------- */
+const words={
+ 'Nouns':[['学生','xuésheng','student'],['老师','lǎoshī','teacher'],['学校','xuéxiào','school'],['教室','jiàoshì','classroom'],['书','shū','book'],['朋友','péngyou','friend'],['同学','tóngxué','classmate'],['水','shuǐ','water']],
+ 'Verbs':[['是','shì','to be'],['去','qù','to go'],['看','kàn','to look'],['读','dú','to read'],['写','xiě','to write'],['说','shuō','to speak'],['听','tīng','to listen'],['喜欢','xǐhuan','to like'],['学习','xuéxí','to study']],
+ 'Adjectives':[['好','hǎo','good'],['大','dà','big'],['小','xiǎo','small'],['高兴','gāoxìng','happy'],['累','lèi','tired'],['新','xīn','new'],['难','nán','difficult'],['容易','róngyi','easy']],
+ 'Question words':[['谁','shéi','who'],['什么','shénme','what'],['哪儿','nǎr','where'],['几','jǐ','how many'],['吗','ma','question marker'],['我','wǒ','I / me'],['你','nǐ','you'],['他','tā','he / him']]
+};
+const W=document.getElementById('words');
+for(const g in words){
+  const h=document.createElement('h3');h.textContent=g;W.appendChild(h);
+  const c=document.createElement('div');c.className='chips';
+  words[g].forEach(w=>{
+    const d=document.createElement('div');d.className='chip';
+    d.innerHTML='<i></i><b></b><span></span>';
+    d.querySelector('i').textContent=w[1];
+    d.querySelector('b').textContent=w[0];
+    d.querySelector('span').textContent=w[2];
+    d.onclick=()=>{document.getElementById('custom').value+=w[0];speak(w[0]);convert();};
+    c.appendChild(d);
+  });
+  W.appendChild(c);
+}
+
+/* ---------- CUSTOM SENTENCE ---------- */
+function convert(){
+  const t=document.getElementById('custom').value;
+  const out=document.getElementById('out');
+  if(!window.pinyinPro){out.textContent='Pinyin tool did not load. Check your internet connection.';return;}
+  out.textContent=t?pinyinPro.pinyin(t,{toneType:'symbol'}):'';
+}
+renderSentences();
 </script>
 </body>
 </html>
