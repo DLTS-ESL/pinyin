@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Pinyin Reader</title>
+<title>School Pinyin</title>
 <style>
 :root{--bg:#f2f6f5;--card:#fff;--ink:#14343a;--mute:#5d7378;--line:#d3e0de;--acc:#1f7a74;
 --t1:#c2362f;--t2:#b7740a;--t3:#2a6fb5;--t4:#7a47b0;--t0:#5d7378;
@@ -51,34 +51,49 @@ textarea{width:100%;min-height:76px;font:inherit;font-size:20px;padding:10px;bor
 .word .en{display:block;font-size:12px;color:var(--mute)}
 #bank .word{background:var(--card);border-color:var(--line)}
 #build{min-height:64px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:2px 14px}
+.pair{display:grid;grid-template-columns:minmax(0,5fr) minmax(0,7fr);gap:6px 16px;align-items:center;padding:12px 0;border-top:1px solid var(--line)}
+.pair:first-child{border-top:0}
+.eng{font-size:17px}
+.zh{display:flex;flex-wrap:wrap;gap:4px;align-items:flex-end}
+.zh .play{align-self:center;margin-left:auto}
+.slot{background:color-mix(in srgb,var(--acc) 16%,transparent);border-bottom:2px solid var(--acc);border-radius:4px;padding:0 6px;font-weight:600;cursor:pointer}
+.word.slotw{background:color-mix(in srgb,var(--acc) 12%,transparent);border-bottom:2px solid var(--acc);border-radius:8px 8px 0 0}
+.hide .eng:not(.show){filter:blur(7px);cursor:pointer}
+.fld{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin:8px 0}
+.fld>label{min-width:112px;color:var(--mute);font-size:14px}
+.fld input,.fld select{font:inherit;padding:6px 8px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--ink);max-width:100%}
+.fld input.hzi{width:110px;font-size:18px}
+@media (max-width:560px){.pair{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
 <main>
-<h1>Pinyin Reader</h1>
-<p class="sub">Tap any letter, word or sentence to hear it. Pinyin colors show the tone.</p>
+<h1>School Pinyin</h1>
+<p class="sub">Practice school conversation. Tap any word or sentence to hear it. Pinyin colors show the tone.</p>
 <div class="bar">
   <label>Speed <input id="rate" type="range" min="0.5" max="1.1" step="0.1" value="0.8" aria-label="Speech speed"></label>
+  <label><input type="checkbox" id="hideEn"> Hide English</label>
   <span class="key" aria-label="Tone colors"><b class="t1">ā 1</b><b class="t2">á 2</b><b class="t3">ǎ 3</b><b class="t4">à 4</b><b class="t0">a</b></span>
 </div>
 <div id="msg" role="status"></div>
 
-<h2>The 26 letters</h2>
-<p class="sub">Each tile plays a Mandarin syllable that starts with that letter. Letter v is only used for ü in loanwords.</p>
-<div class="letters" id="letters"></div>
 
-<h2>Everyday sentences</h2>
-<p class="sub">52 phrases for greetings, questions and daily life. Tap a word to hear it, and show the meaning after you try reading.</p>
+<h2>My details</h2>
+<p class="sub">Change these once and every highlighted blank below updates. For names, type the Chinese characters and the pinyin.</p>
+<div class="sent" id="me"></div>
+
+<h2>School conversations</h2>
+<p class="sub">English on the left, Mandarin on the right. Tap a highlighted English blank to edit it. Tap a Mandarin word to hear it, or ▶ for the whole sentence. Tick Hide English to practice, then tap a line to peek.</p>
 <div id="daily"></div>
 
-<h2>Build your own sentence</h2>
-<p class="sub">Tap words below to add them here, then play it. Chinese puts the subject first: I + like + noodles.</p>
+<h2>Vocabulary and sentence builder</h2>
+<p class="sub">Tap words from the lists to build a sentence here, then play it. Word order is who + does what + to what, like 我 + 喜欢 + 数学.</p>
 <div class="sent"><div class="row" id="build" aria-live="polite"></div><div class="acts"><button class="btn main" id="bplay" type="button">Play</button><button class="btn" id="bundo" type="button">Undo</button><button class="btn" id="bclear" type="button">Clear</button></div></div>
 <div id="bank"></div>
 </main>
 
 <script>
-var L=[["a","a","啊"],["b","bo","波"],["c","ci","雌"],["d","de","得"],["e","e","鹅"],["f","fo","佛"],["g","ge","哥"],["h","he","喝"],["i","yi","衣"],["j","ji","鸡"],["k","ke","科"],["l","le","勒"],["m","mo","摸"],["n","ne","呢"],["o","o","喔"],["p","po","坡"],["q","qi","七"],["r","ri","日"],["s","si","丝"],["t","te","特"],["u","wu","乌"],["v","yu","迂"],["w","wa","挖"],["x","xi","西"],["y","ya","呀"],["z","zi","资"]];
 var msg=document.getElementById("msg"),rate=document.getElementById("rate"),voice=null,cur=null;
 function pickVoice(){var v=(window.speechSynthesis&&speechSynthesis.getVoices())||[];voice=v.find(function(x){return /^zh[-_]CN/i.test(x.lang)})||v.find(function(x){return /^zh/i.test(x.lang)})||null}
 if(window.speechSynthesis){pickVoice();speechSynthesis.onvoiceschanged=pickVoice}
@@ -95,9 +110,10 @@ function tone(p){
   if(/[āēīōūǖ]/.test(p))return 1;if(/[áéíóúǘ]/.test(p))return 2;
   if(/[ǎěǐǒǔǚ]/.test(p))return 3;if(/[àèìòùǜ]/.test(p))return 4;return 0}
 function mk(tag,cls,txt){var e=document.createElement(tag);if(cls)e.className=cls;if(txt!=null)e.textContent=txt;return e}
-function wordBtn(hz,py){
-  var b=mk("button","word");b.type="button";
-  var p=mk("span","py t"+tone(py),py);b.appendChild(p);b.appendChild(mk("span","hz",hz));
+function wordBtn(hz,py,cls){
+  var b=mk("button","word"+(cls?" "+cls:""));b.type="button";
+  var p=mk("span","py");py.split(" ").forEach(function(x,i){if(i)p.appendChild(document.createTextNode(" "));p.appendChild(mk("span","t"+tone(x),x))});
+  b.appendChild(p);b.appendChild(mk("span","hz",hz));
   b.setAttribute("aria-label",py+", "+hz);
   b.onclick=function(){say(hz,b)};return b}
 function render(words,box){
@@ -109,15 +125,10 @@ function actions(box,text,meaning){
   if(meaning){var m=mk("div","meaning hide",meaning),s=mk("button","btn","Show meaning");s.type="button";
     s.onclick=function(){var h=m.classList.toggle("hide");s.textContent=h?"Show meaning":"Hide meaning"};
     a.appendChild(s);box.appendChild(a);box.appendChild(m)}else box.appendChild(a)}
-var lb=document.getElementById("letters");
-L.forEach(function(l){var b=mk("button","letter");b.type="button";
-  b.appendChild(mk("span","big",l[0]));b.appendChild(mk("span","sd",l[1]+" · "+l[2]));
-  b.setAttribute("aria-label","Letter "+l[0]+", sounds like "+l[1]);
-  b.onclick=function(){say(l[2],b)};lb.appendChild(b)});
-var B=[["Nouns","人|rén|person;朋友|péng you|friend;老师|lǎo shī|teacher;学生|xué sheng|student;妈妈|mā ma|mom;爸爸|bà ba|dad;孩子|hái zi|child;家|jiā|home;学校|xué xiào|school;公司|gōng sī|company;医院|yī yuàn|hospital;商店|shāng diàn|shop;饭馆|fàn guǎn|restaurant;水|shuǐ|water;茶|chá|tea;咖啡|kā fēi|coffee;米饭|mǐ fàn|rice;面条|miàn tiáo|noodles;苹果|píng guǒ|apple;书|shū|book;手机|shǒu jī|phone;钱|qián|money;车|chē|car;猫|māo|cat;狗|gǒu|dog;今天|jīn tiān|today;明天|míng tiān|tomorrow;天气|tiān qì|weather;时间|shí jiān|time;中文|zhōng wén|Chinese"],
-["Verbs","是|shì|to be;有|yǒu|to have;去|qù|go;来|lái|come;吃|chī|eat;喝|hē|drink;看|kàn|look, watch;听|tīng|listen;说|shuō|speak;读|dú|read;写|xiě|write;买|mǎi|buy;学习|xué xí|study;工作|gōng zuò|work;喜欢|xǐ huan|like;想|xiǎng|want, think;要|yào|want, need;爱|ài|love;住|zhù|live;睡觉|shuì jiào|sleep;帮助|bāng zhù|help;知道|zhī dào|know"],
-["Adjectives","好|hǎo|good;大|dà|big;小|xiǎo|small;多|duō|many;少|shǎo|few;新|xīn|new;贵|guì|expensive;便宜|pián yi|cheap;热|rè|hot;冷|lěng|cold;忙|máng|busy;累|lèi|tired;高兴|gāo xìng|happy;好吃|hǎo chī|tasty;漂亮|piào liang|pretty;快|kuài|fast;远|yuǎn|far"],
-["Small words","我|wǒ|I;你|nǐ|you;他|tā|he;她|tā|she;我们|wǒ men|we;这|zhè|this;那|nà|that;不|bù|not;很|hěn|very;也|yě|also;都|dōu|all;的|de|’s;吗|ma|question;了|le|done;在|zài|at, -ing;和|hé|and;什么|shén me|what;谁|shéi|who;哪里|nǎ lǐ|where;个|ge|measure word;。||period;？||question mark"]];
+var B=[["Nouns","学校|xué xiào|school;教室|jiào shì|classroom;老师|lǎo shī|teacher;学生|xué sheng|student;同学|tóng xué|classmate;朋友|péng you|friend;校长|xiào zhǎng|principal;班|bān|class (group);书|shū|book;课本|kè běn|textbook;笔|bǐ|pen;铅笔|qiān bǐ|pencil;本子|běn zi|notebook;书包|shū bāo|schoolbag;黑板|hēi bǎn|blackboard;桌子|zhuō zi|desk;椅子|yǐ zi|chair;电脑|diàn nǎo|computer;作业|zuò yè|homework;考试|kǎo shì|exam;课|kè|class, lesson;数学|shù xué|math;英语|yīng yǔ|English;中文|zhōng wén|Chinese;科学|kē xué|science;音乐|yīn yuè|music;体育|tǐ yù|PE;图书馆|tú shū guǎn|library;食堂|shí táng|cafeteria;操场|cāo chǎng|playground;洗手间|xǐ shǒu jiān|restroom;问题|wèn tí|question;答案|dá àn|answer;字|zì|character;词|cí|word;名字|míng zi|name;今天|jīn tiān|today;明天|míng tiān|tomorrow;星期|xīng qī|week;时间|shí jiān|time"],
+["Verbs","是|shì|to be;有|yǒu|to have;去|qù|go;来|lái|come;进|jìn|enter;上课|shàng kè|attend class;下课|xià kè|finish class;迟到|chí dào|be late;学习|xué xí|study;学|xué|learn;教|jiāo|teach;读|dú|read;写|xiě|write;听|tīng|listen;说|shuō|speak;看|kàn|look, watch;问|wèn|ask;回答|huí dá|answer;懂|dǒng|understand;明白|míng bai|understand;知道|zhī dào|know;忘|wàng|forget;帮助|bāng zhù|help;喜欢|xǐ huan|like;想|xiǎng|want, think;要|yào|want, need;打开|dǎ kāi|open;带|dài|bring;跟|gēn|follow;坐|zuò|sit;站起来|zhàn qǐ lai|stand up;举手|jǔ shǒu|raise hand;吃|chī|eat;喝|hē|drink;玩|wán|play"],
+["Adjectives","好|hǎo|good;大|dà|big;小|xiǎo|small;多|duō|many;少|shǎo|few;新|xīn|new;难|nán|difficult;容易|róng yì|easy;简单|jiǎn dān|simple;有意思|yǒu yì si|interesting;聪明|cōng ming|smart;认真|rèn zhēn|serious, diligent;累|lèi|tired;忙|máng|busy;高兴|gāo xìng|happy;安静|ān jìng|quiet;大声|dà shēng|loud;快|kuài|fast;慢|màn|slow;对|duì|correct;错|cuò|wrong;早|zǎo|early;晚|wǎn|late"],
+["Question and small words","我|wǒ|I;你|nǐ|you;他|tā|he;她|tā|she;我们|wǒ men|we;你们|nǐ men|you (plural);他们|tā men|they;这|zhè|this;那|nà|that;的|de|’s;不|bù|not;很|hěn|very;也|yě|also;都|dōu|all;吗|ma|question;呢|ne|and you?;了|le|done;在|zài|at, -ing;和|hé|and;可以|kě yǐ|may, can;什么|shén me|what;谁|shéi|who;哪里|nǎ lǐ|where;什么时候|shén me shí hou|when;怎么|zěn me|how;几|jǐ|how many;多少|duō shao|how many, how much;为什么|wèi shén me|why;。||period;？||question mark;！||exclamation mark;，||comma"]];
 var arr=[],bd=document.getElementById("build");
 function draw(){bd.textContent="";if(!arr.length)bd.appendChild(mk("span","meaning","Your sentence appears here"));
   arr.forEach(function(w){bd.appendChild(w[1]?wordBtn(w[0],w[1]):mk("span","punc",w[0]))})}
@@ -134,68 +145,128 @@ document.getElementById("bplay").onclick=function(){if(arr.length)say(arr.map(fu
 document.getElementById("bundo").onclick=function(){arr.pop();draw()};
 document.getElementById("bclear").onclick=function(){arr=[];draw()};
 var G=[
+["Introduce yourself (change the blanks)",[
+"My name is {name}.#我|wǒ/叫|jiào/{name}/。",
+"I am {age} years old.#我|wǒ/{age}/。",
+"I am a student in grade {grade}.#我|wǒ/是|shì/{grade}/的|de/学生|xué sheng/。",
+"My favorite subject is {subject}.#我|wǒ/最|zuì/喜欢|xǐ huan/{subject}/。",
+"My teacher is {teacher}.#我|wǒ/的|de/老师|lǎo shī/是|shì/{teacher}/。",
+"Hello, {teacher}!#{teacher}/好|hǎo/！",
+"Thank you, {teacher}.#谢谢|xiè xie/{teacher}/。",
+"Are you {name}?#你|nǐ/是|shì/{name}/吗|ma/？",
+"I like {subject}.#我|wǒ/喜欢|xǐ huan/{subject}/。",
+"I don’t like {subject}.#我|wǒ/不|bù/喜欢|xǐ huan/{subject}/。",
+"We have {subject} class today.#今天|jīn tiān/有|yǒu/{subject}/课|kè/。",
+"Class starts at {time} o’clock.#我们|wǒ men/{time}/上课|shàng kè/。"]],
 ["Greetings",[
-"Hello!#你|nǐ/好|hǎo/！",
-"Hello (polite)!#您|nín/好|hǎo/！",
+"Hello, classmates!#同学们|tóng xué men/好|hǎo/！",
 "Good morning!#早上|zǎo shang/好|hǎo/！",
-"Good afternoon!#下午|xià wǔ/好|hǎo/！",
-"Good evening!#晚上|wǎn shang/好|hǎo/！",
-"Good night.#晚安|wǎn ān/。",
-"Goodbye!#再见|zài jiàn/！",
-"See you tomorrow!#明天|míng tiān/见|jiàn/！",
-"Nice to meet you.#很|hěn/高兴|gāo xìng/认识|rèn shi/你|nǐ/。",
-"Welcome!#欢迎|huān yíng/！"]],
-["Polite phrases",[
-"Thank you.#谢谢|xiè xie/你|nǐ/。",
-"You’re welcome.#不客气|bú kè qi/。",
-"Sorry.#对不起|duì bu qǐ/。",
-"It’s okay.#没关系|méi guān xi/。",
-"Excuse me.#请问|qǐng wèn/。",
+"Hello!#你|nǐ/好|hǎo/！",
+"Please come in.#请|qǐng/进|jìn/。",
 "Please sit.#请|qǐng/坐|zuò/。",
-"Please wait a moment.#请|qǐng/等|děng/一下|yí xià/。",
-"Happy birthday!#生日|shēng rì/快乐|kuài lè/！"]],
-["About me",[
-"My name is Xiao Ming.#我|wǒ/叫|jiào/小明|xiǎo míng/。",
-"I am a student.#我|wǒ/是|shì/学生|xué sheng/。",
-"I am studying Chinese.#我|wǒ/正在|zhèng zài/学习|xué xí/中文|zhōng wén/。",
-"I don’t speak Chinese well.#我|wǒ/说|shuō/得|de/不|bù/好|hǎo/。",
-"I have a cat.#我|wǒ/有|yǒu/一只|yì zhī/猫|māo/。",
-"I love you.#我|wǒ/爱|ài/你|nǐ/。"]],
-["Asking questions",[
-"How are you?#你|nǐ/好|hǎo/吗|ma/？",
-"I’m fine, and you?#我|wǒ/很|hěn/好|hǎo/，/你|nǐ/呢|ne/？",
-"What’s your name?#你|nǐ/叫|jiào/什么|shén me/名字|míng zi/？",
-"Where are you from?#你|nǐ/是|shì/哪|nǎ/国|guó/人|rén/？",
-"Where is the restroom?#洗手间|xǐ shǒu jiān/在|zài/哪里|nǎ lǐ/？",
-"What is this?#这|zhè/是|shì/什么|shén me/？",
-"How much is this?#这个|zhè ge/多少|duō shao/钱|qián/？",
-"What time is it?#现在|xiàn zài/几点|jǐ diǎn/？",
+"Sorry, I’m late.#对不起|duì bu qǐ/，/我|wǒ/迟到|chí dào/了|le/。",
+"It’s okay.#没关系|méi guān xi/。",
+"Class is over.#下课|xià kè/了|le/。",
+"Goodbye, see you tomorrow!#再见|zài jiàn/，/明天|míng tiān/见|jiàn/！"]],
+["Asking: who and what",[
+"Who is she?#她|tā/是|shì/谁|shéi/？",
 "Who is he?#他|tā/是|shì/谁|shéi/？",
-"Why?#为什么|wèi shén me/？",
-"How do I get to the station?#去|qù/火车站|huǒ chē zhàn/怎么|zěn me/走|zǒu/？",
-"Do you speak English?#你|nǐ/会|huì/说|shuō/英语|yīng yǔ/吗|ma/？",
-"Can you help me?#你|nǐ/可以|kě yǐ/帮|bāng/我|wǒ/吗|ma/？",
-"Do you understand?#你|nǐ/听|tīng/得|de/懂|dǒng/吗|ma/？",
-"Do you have tea?#你们|nǐ men/有|yǒu/茶|chá/吗|ma/？",
-"Is it far?#远|yuǎn/不|bu/远|yuǎn/？"]],
-["Everyday needs",[
+"Is she a teacher?#她|tā/是|shì/老师|lǎo shī/吗|ma/？",
+"Are you a student?#你|nǐ/是|shì/学生|xué sheng/吗|ma/？",
+"What’s your name?#你|nǐ/叫|jiào/什么|shén me/名字|míng zi/？",
+"How old are you?#你|nǐ/多大|duō dà/？",
+"What grade are you in?#你|nǐ/几年级|jǐ nián jí/？",
+"What is this?#这|zhè/是|shì/什么|shén me/？",
+"What is that?#那|nà/是|shì/什么|shén me/？",
+"What does this word mean?#这个|zhè ge/词|cí/是|shì/什么|shén me/意思|yì si/？",
+"Who is your teacher?#你|nǐ/的|de/老师|lǎo shī/是|shì/谁|shéi/？",
+"What class do you like?#你|nǐ/喜欢|xǐ huan/什么|shén me/课|kè/？"]],
+["Asking: where, when, how many",[
+"Where is the classroom?#教室|jiào shì/在|zài/哪里|nǎ lǐ/？",
+"Where is the library?#图书馆|tú shū guǎn/在|zài/哪里|nǎ lǐ/？",
+"Where is the restroom?#洗手间|xǐ shǒu jiān/在|zài/哪里|nǎ lǐ/？",
+"What time is it?#现在|xiàn zài/几点|jǐ diǎn/？",
+"What day is today?#今天|jīn tiān/星期|xīng qī/几|jǐ/？",
+"What time does class start?#几点|jǐ diǎn/上课|shàng kè/？",
+"When is the exam?#考试|kǎo shì/是|shì/什么|shén me/时候|shí hou/？",
+"How many students are in your class?#你们|nǐ men/班|bān/有|yǒu/几个|jǐ ge/学生|xué sheng/？",
+"Is there a lot of homework?#作业|zuò yè/多|duō/吗|ma/？",
+"How do you get to school?#你|nǐ/怎么|zěn me/去|qù/学校|xué xiào/？"]],
+["Asking: how, why, can I",[
+"How do you read this character?#这个|zhè ge/字|zì/怎么|zěn me/读|dú/？",
+"How do you write this character?#这个|zhè ge/字|zì/怎么|zěn me/写|xiě/？",
+"Why do you study Chinese?#你|nǐ/为什么|wèi shén me/学|xué/中文|zhōng wén/？",
+"Do you understand?#你|nǐ/明白|míng bai/吗|ma/？",
+"Did you understand?#你|nǐ/听|tīng/懂|dǒng/了|le/吗|ma/？",
+"Can you say it again?#可以|kě yǐ/再|zài/说|shuō/一遍|yí biàn/吗|ma/？",
+"May I go to the restroom?#我|wǒ/可以|kě yǐ/去|qù/洗手间|xǐ shǒu jiān/吗|ma/？",
+"May I ask a question?#我|wǒ/可以|kě yǐ/问|wèn/一个|yí ge/问题|wèn tí/吗|ma/？",
+"Do you have a pen?#你|nǐ/有|yǒu/笔|bǐ/吗|ma/？",
+"Can you help me?#你|nǐ/可以|kě yǐ/帮助|bāng zhù/我|wǒ/吗|ma/？"]],
+["Teacher says",[
+"Please open your book.#请|qǐng/打开|dǎ kāi/书|shū/。",
+"Please look at the blackboard.#请|qǐng/看|kàn/黑板|hēi bǎn/。",
+"Please read after me.#请|qǐng/跟|gēn/我|wǒ/读|dú/。",
+"Please be quiet.#请|qǐng/安静|ān jìng/。",
+"Please raise your hand.#请|qǐng/举手|jǔ shǒu/。",
+"Please write your name.#请|qǐng/写|xiě/你|nǐ/的|de/名字|míng zi/。",
+"Please answer the question.#请|qǐng/回答|huí dá/问题|wèn tí/。",
+"Please stand up.#请|qǐng/站起来|zhàn qǐ lai/。",
+"Please read aloud.#请|qǐng/大声|dà shēng/读|dú/。",
+"There is an exam today.#今天|jīn tiān/有|yǒu/考试|kǎo shì/。"]],
+["I say",[
+"I am a student.#我|wǒ/是|shì/学生|xué sheng/。",
+"She is my teacher.#她|tā/是|shì/我|wǒ/的|de/老师|lǎo shī/。",
+"He is my classmate.#他|tā/是|shì/我|wǒ/的|de/同学|tóng xué/。",
+"This is my book.#这|zhè/是|shì/我|wǒ/的|de/书|shū/。",
+"That is the classroom.#那|nà/是|shì/教室|jiào shì/。",
+"I don’t like exams.#我|wǒ/不|bù/喜欢|xǐ huan/考试|kǎo shì/。",
+"I have a lot of homework.#我|wǒ/有|yǒu/很|hěn/多|duō/作业|zuò yè/。",
+"Chinese is interesting.#中文|zhōng wén/很|hěn/有意思|yǒu yì si/。",
 "I don’t understand.#我|wǒ/不|bù/明白|míng bai/。",
-"Please say it again.#请|qǐng/再|zài/说|shuō/一遍|yí biàn/。",
-"Please speak slowly.#请|qǐng/说|shuō/慢|màn/一点|yì diǎn/。",
-"I want to drink water.#我|wǒ/想|xiǎng/喝|hē/水|shuǐ/。",
-"I’m hungry.#我|wǒ/饿|è/了|le/。",
-"I’m thirsty.#我|wǒ/渴|kě/了|le/。",
-"I like noodles.#我|wǒ/喜欢|xǐ huan/吃|chī/面条|miàn tiáo/。",
-"Too expensive!#太|tài/贵|guì/了|le/！",
-"Can it be a bit cheaper?#便宜|pián yi/一点|yì diǎn/，/可以|kě yǐ/吗|ma/？",
-"I want to go home.#我|wǒ/要|yào/回家|huí jiā/。",
-"I’m tired.#我|wǒ/很|hěn/累|lèi/。",
-"The weather is nice today.#今天|jīn tiān/天气|tiān qì/很|hěn/好|hǎo/。"]]
+"I understand.#我|wǒ/听|tīng/懂|dǒng/了|le/。",
+"I forgot my book.#我|wǒ/忘|wàng/了|le/带|dài/书|shū/。"]]
 ];
-var db=document.getElementById("daily");
-G.forEach(function(g){db.appendChild(mk("h3","cat",g[0]));
-  g[1].forEach(function(s){var q=s.split("#"),w=q[1].split("/").map(function(x){return x.split("|")}),box=mk("div","sent");
-    render(w,box);actions(box,w.map(function(x){return x[0]}).join(""),q[0]);db.appendChild(box)})});
+var ME={name:{en:"Xiao Ming",hz:"小明",py:"xiǎo míng"},teacher:{en:"Ms. Wang",hz:"王老师",py:"wáng lǎo shī"},age:10,grade:5,sub:0,time:8};
+var SUB=[["math","数学","shù xué"],["English","英语","yīng yǔ"],["Chinese","中文","zhōng wén"],["science","科学","kē xué"],["music","音乐","yīn yuè"],["PE","体育","tǐ yù"],["art","美术","měi shù"],["history","历史","lì shǐ"]];
+var U=[["",""],["一","yī"],["二","èr"],["三","sān"],["四","sì"],["五","wǔ"],["六","liù"],["七","qī"],["八","bā"],["九","jiǔ"],["十","shí"]];
+function num(n){if(n<=10)return U[n];if(n<20)return["十"+U[n-10][0],"shí "+U[n-10][1]];return["二十","èr shí"]}
+function slot(k){var n;
+  if(k=="name"||k=="teacher"){var o=ME[k];return[o.en||"____",[o.hz||"＿＿",o.py||"…"]]}
+  if(k=="age"){n=num(ME.age);return[String(ME.age),[n[0]+"岁",n[1]+" suì"]]}
+  if(k=="grade"){n=num(ME.grade);return[String(ME.grade),[n[0]+"年级",n[1]+" nián jí"]]}
+  if(k=="time"){n=num(ME.time);return[String(ME.time),[n[0]+"点",n[1]+" diǎn"]]}
+  var x=SUB[ME.sub];return[x[0],[x[1],x[2]]]}
+var db=document.getElementById("daily"),meBox=document.getElementById("me");
+function goField(k){var f=document.getElementById("f-"+k);f.scrollIntoView({block:"center"});var i=f.querySelector("input,select");if(i)i.focus()}
+function pair(s){
+  var q=s.split("#"),row=mk("div","pair"),en=mk("div","eng"),zh=mk("div","zh"),hz=[];
+  q[0].split(/(\{\w+\})/).forEach(function(t){var m=t.match(/^\{(\w+)\}$/);
+    if(m){var c=mk("span","slot",slot(m[1])[0]);c.onclick=function(e){e.stopPropagation();goField(m[1])};en.appendChild(c)}
+    else if(t)en.appendChild(document.createTextNode(t))});
+  en.onclick=function(){en.classList.toggle("show")};
+  q[1].split("/").forEach(function(t){var m=t.match(/^\{(\w+)\}$/);
+    if(m){var v=slot(m[1])[1];hz.push(v[0]);zh.appendChild(wordBtn(v[0],v[1],"slotw"))}
+    else{var x=t.split("|");hz.push(x[0]);zh.appendChild(x[1]?wordBtn(x[0],x[1]):mk("span","punc",x[0]))}});
+  var pb=mk("button","btn play","▶");pb.type="button";pb.setAttribute("aria-label","Play sentence");
+  pb.onclick=function(){say(hz.join(""),pb)};zh.appendChild(pb);
+  row.appendChild(en);row.appendChild(zh);return row}
+function drawS(){db.textContent="";
+  G.forEach(function(g){db.appendChild(mk("h3","cat",g[0]));var card=mk("div","card");
+    g[1].forEach(function(s){card.appendChild(pair(s))});db.appendChild(card)})}
+function fld(id,label,els){var d=mk("div","fld");d.id="f-"+id;d.appendChild(mk("label",null,label));els.forEach(function(e){d.appendChild(e)});meBox.appendChild(d)}
+function inp(ph,o,k,cls){var i=mk("input",cls||"");i.type="text";i.placeholder=ph;i.value=o[k];i.setAttribute("aria-label",ph);i.oninput=function(){o[k]=i.value;drawS()};return i}
+function sel(o,k,opts){var s=mk("select");opts.forEach(function(t,i){var op=mk("option",null,t[0]);op.value=t[1];s.appendChild(op)});
+  s.value=o[k];s.onchange=function(){o[k]=parseInt(s.value,10);drawS()};return s}
+function range(a,b){var r=[];for(var i=a;i<=b;i++)r.push([String(i),i]);return r}
+fld("name","My name",[inp("English name",ME.name,"en"),inp("汉字",ME.name,"hz","hzi"),inp("pinyin",ME.name,"py")]);
+fld("age","My age",[sel(ME,"age",range(5,20))]);
+fld("grade","My grade",[sel(ME,"grade",range(1,12))]);
+fld("subject","Favorite subject",[sel(ME,"sub",SUB.map(function(x,i){return[x[0],i]}))]);
+fld("teacher","My teacher",[inp("English name",ME.teacher,"en"),inp("汉字",ME.teacher,"hz","hzi"),inp("pinyin",ME.teacher,"py")]);
+fld("time","Class starts at",[sel(ME,"time",range(6,11))]);
+document.getElementById("hideEn").onchange=function(){document.body.classList.toggle("hide",this.checked)};
+drawS();
 </script>
 </body>
 </html>
